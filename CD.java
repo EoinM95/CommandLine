@@ -4,7 +4,8 @@ public class CD extends Command {
 	private Shell sh;
 	private File newDirectory;
 	private final Pattern filePattern;
-	public CD(String args, Shell s) {
+	public CD(String args, Shell s) {//On peut ajouter des symboles dans l'expression
+		//pour accepter plus de données 
 		filePattern=Pattern.compile("((([a-zA-Z0-9])([a-zA-Z0-9 ]*)\\\\?)+)");
 		this.sh=s;
 		String path="";
@@ -18,7 +19,7 @@ public class CD extends Command {
 				path=sh.getDirectory()+"\\"+args;
 		}
 		else{
-			sh.showErrorMessage("Illegal directory name");
+			sh.showErrorMessage("Nom illégal pour un répetoire");
 		}
 		newDirectory=new File(path);
 	}
@@ -28,10 +29,14 @@ public class CD extends Command {
 		if(newDirectory.exists()&&newDirectory.isDirectory())
 			sh.setDirectory(newDirectory);
 		else
-			sh.showErrorMessage("Directory not found");
+			sh.showErrorMessage("Répetoire pas trouvé");
 	}
-	
-	private boolean isAbsolutePath(String path){//C:\\((([a-zA-Z0-9 ]+)(\\?))*)
+	/**
+	 * 
+	 * @param path, un chemin à tester
+	 * @return true si "path" est un chemin absolue
+	 */
+	private boolean isAbsolutePath(String path){//il faut changer cette expression pour des systèmes *NIX
 		Pattern absolutePattern=Pattern.compile("C:\\\\((([a-zA-Z0-9 ]+)(\\\\?))*)");
 		return absolutePattern.matcher(path).matches();
 	}

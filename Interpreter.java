@@ -1,4 +1,9 @@
-
+/**
+ * Classe qui contient tous les commandes implementées et qui decide
+ * à quelle commande l'entrée dans le terminal correspond
+ * @author Eoin Murphy
+ *
+ */
 public class Interpreter {
 	private Shell sh;
 	public Interpreter(Shell sh){

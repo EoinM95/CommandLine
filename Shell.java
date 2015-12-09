@@ -56,7 +56,7 @@ public class Shell implements Runnable {
 					}
 				}
 				else 
-					showErrorMessage("Illegal input");
+					showErrorMessage("Symbole illégale");
 				pwd();
 			}
 		}
@@ -81,10 +81,10 @@ public class Shell implements Runnable {
 	
 	public void showErrorMessage(String message){
 		error=true;
-		System.out.println("Error: "+message);
+		System.out.println("Erreur: "+message);
 	}
 	
-	public static void main(String[] args){
+	public static void main(String[] args){//Juste pour tester
 		Shell s = new Shell();
 		s.run();
 	}
