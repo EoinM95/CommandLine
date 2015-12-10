@@ -10,13 +10,15 @@ public class Interpreter {
 		this.sh=sh;
 	}
 	enum Commands{
-		CD,LS;
+		CD,LS, DATE;
 		public Command command(String cmd, String args, Shell sh){
 			switch(this){
 			case CD:
 				return new CD(args,sh);
 			case LS:
 				return new LS(sh);
+			case DATE:
+				return new CDate(args);
 			default:
 				return null;
 			}

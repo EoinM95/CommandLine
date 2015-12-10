@@ -1,6 +1,6 @@
 /**
  * Une interface qui peut permet à Shell de decider si deux commandes peut accpeter
- * l'entrée/sortie
+ * l'entrée/sortie 
  * @author Eoin Murphy
  *
  */

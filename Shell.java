@@ -2,8 +2,8 @@ import java.io.File;
 import java.util.Scanner;
 import java.util.regex.*;
 public class Shell implements Runnable {
-	private final String USER_NAME=System.getProperty("user.name");
-	private final File START_DIRECTORY=new File(System.getProperty("user.home"));
+	public final String USER_NAME=System.getProperty("user.name");
+	public final File START_DIRECTORY=new File(System.getProperty("user.home"));
 	private Interpreter i;
 	private File currentDirectory;
 	private boolean error;
@@ -18,22 +18,21 @@ public class Shell implements Runnable {
 	}
 	
 	/**
-	 * @return the current Directory
+	 * @return La répétiore courante
 	 */
 	public File getDirectory() {
 		return currentDirectory;
 	}
 	
 	public void pwd(){
-		System.out.println(USER_NAME+currentDirectory.toString());
+		System.out.println(USER_NAME+"@"+currentDirectory.toString());
 	}
 
 	/**
-	 * @param directory 
+	 * @param directory, mettre à jour la répétoire courante
 	 */
 	public void setDirectory(File directory) {
 		this.currentDirectory = directory;
-		System.out.println(USER_NAME+currentDirectory.toString());
 	}
 
 	public void run(){
@@ -42,10 +41,17 @@ public class Shell implements Runnable {
 				error=false;
 				String input=readInput();
 				m=commandPattern.matcher(input);
+				boolean pwd=false;
+				/*
+				 * Il faut ajouter un cas ici pour des commandes avec |
+				 * Il faut améliorer l'implémentation multi-taches
+				 */
 				if(m.matches()){
 					String args[] =parse(input);
-					if(args[0].equals("pwd"))
+					if(args[0].equals("pwd")){
 						pwd();
+						pwd=true;
+					}	
 					else{
 						Command c=i.command(args[0],args[1]);
 						if(!error&&c!=null){
@@ -57,7 +63,8 @@ public class Shell implements Runnable {
 				}
 				else 
 					showErrorMessage("Symbole illégale");
-				pwd();
+				if(!pwd)
+					pwd();
 			}
 		}
 		catch(Exception e){
@@ -69,6 +76,7 @@ public class Shell implements Runnable {
 		String[] parsed= new String[2];
 		parsed[0]=m.group("command");
 		parsed[1]=m.group("args");
+		System.out.println("args="+parsed[1]);
 		return parsed;
 	}
 
