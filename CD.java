@@ -4,9 +4,13 @@ public class CD extends Command {
 	private Shell sh;
 	private File newDirectory;
 	private final Pattern filePattern;
+	private String seperator=File.separator;
+	private String regexSep=seperator;
 	public CD(String args, Shell s) {//On peut ajouter des symboles dans l'expression
-		//pour accepter plus de données 
-		filePattern=Pattern.compile("((([a-zA-Z0-9])([a-zA-Z0-9 ]*)\\\\?)+)");
+		//pour accepter plus de données
+		if(seperator.equals("\\"))
+			regexSep="\\\\";
+		filePattern=Pattern.compile("((([a-zA-Z0-9])([a-zA-Z0-9 ]*)"+regexSep+"?)+)");
 		this.sh=s;
 		String path="";
 		if(args.startsWith("..")){
@@ -16,7 +20,7 @@ public class CD extends Command {
 		if(isAbsolutePath(args))	
 			path=args;
 		else if(filePattern.matcher(args).matches()){
-				path=sh.getDirectory()+"\\"+args;
+				path=sh.getDirectory()+seperator+args;
 		}
 		else{
 			sh.showErrorMessage("Nom illégal pour un répetoire");
@@ -37,7 +41,14 @@ public class CD extends Command {
 	 * @return true si "path" est un chemin absolue
 	 */
 	private boolean isAbsolutePath(String path){//il faut changer cette expression pour des systèmes *NIX
-		Pattern absolutePattern=Pattern.compile("C:\\\\((([a-zA-Z0-9 ]+)(\\\\?))*)");
+		String root="";
+		File directory=Shell.START_DIRECTORY;
+		while(directory.getParent()!=null){
+			directory=new File(directory.getParent());
+		}
+		root=directory.toString();
+		root=root.replaceAll(regexSep,"");
+		Pattern absolutePattern=Pattern.compile(root+regexSep+"((([a-zA-Z0-9 ]+)("+regexSep+"?))*)");
 		return absolutePattern.matcher(path).matches();
 	}
 	

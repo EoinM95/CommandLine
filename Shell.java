@@ -3,8 +3,8 @@ import java.util.Hashtable;
 import java.util.Scanner;
 import java.util.regex.*;
 public class Shell implements Runnable {
-	public final String USER_NAME=System.getProperty("user.name");
-	public final File START_DIRECTORY=new File(System.getProperty("user.home"));
+	public static final String USER_NAME=System.getProperty("user.name");
+	public static final File START_DIRECTORY=new File(System.getProperty("user.home"));
 	private Interpreter i;
 	private File currentDirectory;
 	private boolean error;
@@ -15,6 +15,7 @@ public class Shell implements Runnable {
 	public Shell(){
 		commandPattern=Pattern.compile("(?<command>[a-z]+) ?(?<args>.*)");
 		i=new Interpreter(this);
+		activeProcesses=new Hashtable<Integer,Thread>();
 		error=false;
 		currentDirectory=START_DIRECTORY;
 		System.out.println(USER_NAME+"@"+currentDirectory.toString());
