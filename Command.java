@@ -1,5 +1,10 @@
 
 public abstract class Command implements Runnable {
-	private int pid;
-	//protected abstract void generatePID(); 
+	protected int pid;
+	public void setPID(int pid){
+		this.pid=pid;
+	}	
+	public int getPID(){
+		return pid;
+	}
 }

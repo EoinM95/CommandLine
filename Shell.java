@@ -1,4 +1,5 @@
 import java.io.File;
+import java.util.Hashtable;
 import java.util.Scanner;
 import java.util.regex.*;
 public class Shell implements Runnable {
@@ -9,8 +10,10 @@ public class Shell implements Runnable {
 	private boolean error;
 	private final Pattern commandPattern;
 	private Matcher m;
+	private Hashtable<Integer,Thread> activeProcesses;
+	private int processCount=0;
 	public Shell(){
-		commandPattern=Pattern.compile("(?<command>[a-z]+) ?(?<args>[a-zA-Z0-9\\\\ \\.\\?!]*)");
+		commandPattern=Pattern.compile("(?<command>[a-z]+) ?(?<args>.*)");
 		i=new Interpreter(this);
 		error=false;
 		currentDirectory=START_DIRECTORY;
@@ -55,7 +58,9 @@ public class Shell implements Runnable {
 					else{
 						Command c=i.command(args[0],args[1]);
 						if(!error&&c!=null){
+							c.setPID(processCount++);
 							Thread current=new Thread(c);
+							activeProcesses.put((Integer)c.getPID(),current);
 							current.start();
 							current.join();
 						}
@@ -76,7 +81,6 @@ public class Shell implements Runnable {
 		String[] parsed= new String[2];
 		parsed[0]=m.group("command");
 		parsed[1]=m.group("args");
-		System.out.println("args="+parsed[1]);
 		return parsed;
 	}
 

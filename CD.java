@@ -40,5 +40,9 @@ public class CD extends Command {
 		Pattern absolutePattern=Pattern.compile("C:\\\\((([a-zA-Z0-9 ]+)(\\\\?))*)");
 		return absolutePattern.matcher(path).matches();
 	}
+	
+	public File directory(){
+		return newDirectory;
+	}
 
 }
