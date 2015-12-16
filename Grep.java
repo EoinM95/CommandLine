@@ -20,19 +20,26 @@ public class Grep extends Command {
 		argFormat=Pattern.compile("(?<regex>[^ ]*)(?<files> (.*))+");
 		Matcher m=argFormat.matcher(args);
 		if(m.matches()){
-			regex=Pattern.compile(m.group("regex"));
-			String file=m.group("files");
-			String[] files=file.split(" ");
-			for(String f:files){
-				if(!(f.equals("")||f.equals(" "))){
-					File next=new File(sh.getDirectory()+CD.seperator+f);
-					if(!next.exists())
-						next=new File(f);				
-					if(next!=null&&next.exists())
-						fileList.add(next);
-					else
-						sh.showErrorMessage("Un des fichiers: "+f+" pas trouvée");
+			try{
+				regex=Pattern.compile(m.group("regex"));
+
+
+				String file=m.group("files");
+				String[] files=file.split(" ");
+				for(String f:files){
+					if(!(f.equals("")||f.equals(" "))){
+						File next=new File(sh.getDirectory()+CD.seperator+f);
+						if(!next.exists())
+							next=new File(f);				
+						if(next!=null&&next.exists())
+							fileList.add(next);
+						else
+							sh.showErrorMessage("Un des fichiers: "+f+" pas trouvée");
+					}
 				}
+			}
+			catch(PatternSyntaxException e){
+				sh.showErrorMessage("Syntaxe illégale pour regex");
 			}
 		}
 		else{
@@ -62,9 +69,10 @@ public class Grep extends Command {
 			sh.notifyFinished(this,false);
 		}
 		catch (FileNotFoundException e) {		
-				e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+			sh.showErrorMessage("Fichier pas trouvé");
+		}
+		catch (IOException e) {
+			sh.showErrorMessage("Erreur de lecture de fichier");
 		}
 	}
 

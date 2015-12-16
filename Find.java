@@ -15,10 +15,15 @@ public class Find extends Command implements OutPipeable{
 			CD directoryCheck=new CD(m.group("path"),sh);
 			path= directoryCheck.directory();
 			caseSensitive=m.group("param").equals("-name");
-			if(caseSensitive)
-				regex=Pattern.compile(m.group("regex"));
-			else
-				regex=Pattern.compile(m.group("regex").toLowerCase());
+			try{
+				if(caseSensitive)
+					regex=Pattern.compile(m.group("regex"));
+				else
+					regex=Pattern.compile(m.group("regex").toLowerCase());
+			}
+			catch(PatternSyntaxException e){
+				sh.showErrorMessage("Syntaxe illégale pour regex");
+			}
 		}
 		else{
 			sh.showErrorMessage("Argument illégale pour commande <<find>>");
