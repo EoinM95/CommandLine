@@ -10,6 +10,6 @@ public abstract interface Pipeable {
 
 interface OutPipeable extends Pipeable{}
 
-interface InPipeable extends Pipeable{
+interface InPipeable{
 	public abstract String input(String input);
 }

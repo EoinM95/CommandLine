@@ -29,8 +29,10 @@ public class Find extends Command implements OutPipeable{
 	public void run() {
 		if(path.exists()&&path.isDirectory()){
 			printFiles(path);
+			sh.notifyFinished(this,false);
 		}
 		else{
+			sh.notifyFinished(this,true);
 			sh.showErrorMessage("Répétoire pas trouvée");
 		}
 	}
@@ -50,7 +52,7 @@ public class Find extends Command implements OutPipeable{
 							m=regex.matcher(file.toString().toLowerCase());
 						if(m.find()){
 							result+=file.toString()+"\n";
-							System.out.println(file.toString());
+							//System.out.println(file.toString());
 						}
 					}
 				}

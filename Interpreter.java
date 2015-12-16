@@ -10,17 +10,19 @@ public class Interpreter {
 		this.sh=sh;
 	}
 	enum Commands{
-		CD,LS, DATE, FIND;
+		cd,ls, date,find,compteJusqua;
 		public Command command(String cmd, String args, Shell sh){
 			switch(this){
-			case CD:
+			case cd:
 				return new CD(args,sh);
-			case LS:
+			case ls:
 				return new LS(sh);
-			case DATE:
+			case date:
 				return new CDate(args,sh);
-			case FIND:
+			case find:
 				return new Find(args,sh);
+			case compteJusqua:
+				return new Compte(args,sh);
 			default:
 				return null;
 			}
@@ -28,10 +30,9 @@ public class Interpreter {
 	}
 	public Command command(String cmd, String args){
 		Command c=null;
-		cmd=cmd.toUpperCase();
-		for(Commands commands:Commands.values()){
-			if(commands.toString().equals(cmd))
-				c=commands.command(cmd,args,sh);
+		for(Commands com:Commands.values()){
+			if(com.toString().equals(cmd))
+				c=com.command(cmd,args,sh);
 		}
 		return c;		
 	}

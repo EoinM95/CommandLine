@@ -1,5 +1,5 @@
 
-public class LS extends Command implements OutPipeable {
+public class LS extends Command {
 	private Shell sh;
 	private String result;
 	public LS(Shell sh){

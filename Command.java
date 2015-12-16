@@ -1,5 +1,5 @@
 
-public abstract class Command implements Runnable {
+public abstract class Command implements Runnable, OutPipeable{
 	protected int pid;
 	public void setPID(int pid){
 		this.pid=pid;

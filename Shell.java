@@ -3,23 +3,45 @@ import java.util.Hashtable;
 import java.util.Scanner;
 import java.util.regex.*;
 public class Shell implements Runnable {
+	private class ShellThread extends Thread{
+		private Command c;
+
+		public ShellThread(Command c) {
+			super(c);
+			this.c=c;
+		}
+		
+		public void kill(){
+			this.interrupt();
+			
+		}
+
+		/**
+		 * @return the c
+		 */
+		public Command getCommand() {
+			return c;
+		}
+	}
 	public static final String USER_NAME=System.getProperty("user.name");
 	public static final File START_DIRECTORY=new File(System.getProperty("user.home"));
-	private Interpreter i;
+	private Interpreter interpreter;
 	private File currentDirectory;
 	private boolean error;
 	private final Pattern commandPattern;
 	private Matcher m;
-	private Hashtable<Integer,Thread> activeProcesses;
+	private Hashtable<Integer,ShellThread> activeProcesses;
 	private int processCount=0;
 	public Shell(){
-		commandPattern=Pattern.compile("(?<command>[a-z]+) ?(?<args>.*)");
-		i=new Interpreter(this);
-		activeProcesses=new Hashtable<Integer,Thread>();
+		commandPattern=Pattern.compile("(?<command>[a-zA-Z]+) ?(?<args>.*)");
+		interpreter=new Interpreter(this);
+		activeProcesses=new Hashtable<Integer,ShellThread>();
 		error=false;
 		currentDirectory=START_DIRECTORY;
 		System.out.println(USER_NAME+"@"+currentDirectory.toString());
 	}
+	
+	
 	
 	/**
 	 * @return La répétiore courante
@@ -42,14 +64,20 @@ public class Shell implements Runnable {
 	public void run(){
 		try{
 			while(true){
+				//Thread.sleep(20);
+				/*for(int i=0;i<processCount;i++){
+					ShellThread p=activeProcesses.get((Integer)i);
+					if(p!=null&&!p.isAlive()){
+						System.out.println("La commande pid="+i+" a terminé, son resultat:");
+						System.out.println(p.getCommand().result());
+						activeProcesses.remove((Integer)i);
+						pwd();
+					}
+				}*/
 				error=false;
 				String input=readInput();
 				m=commandPattern.matcher(input);
 				boolean pwd=false;
-				/*
-				 * Il faut ajouter un cas ici pour des commandes avec |
-				 * Il faut améliorer l'implémentation multi-taches
-				 */
 				if(m.matches()){
 					String args[] =parse(input);
 					if(args[0].equals("pwd")){
@@ -57,13 +85,14 @@ public class Shell implements Runnable {
 						pwd=true;
 					}	
 					else{
-						Command c=i.command(args[0],args[1]);
+						Command c=interpreter.command(args[0],args[1]);
 						if(!error&&c!=null){
 							c.setPID(processCount++);
-							Thread current=new Thread(c);
-							activeProcesses.put((Integer)c.getPID(),current);
+							ShellThread current=new ShellThread(c);
+							//activeProcesses.put((Integer)c.getPID(),current);
+							System.out.println(args[0]+" pid="+c.getPID());
 							current.start();
-							current.join();
+							Thread.sleep(20);
 						}
 					}
 				}
@@ -78,6 +107,14 @@ public class Shell implements Runnable {
 		}
 	}
 
+	public void notifyFinished(Command c, boolean error){
+		if(!error){
+			System.out.println("La commande pid="+c.getPID()+" a terminé, son resultat:");
+			System.out.println(c.result());
+			pwd();
+		}
+	}
+	
 	private String[] parse(String input) {
 		String[] parsed= new String[2];
 		parsed[0]=m.group("command");

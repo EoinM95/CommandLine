@@ -6,8 +6,7 @@ public class CD extends Command {
 	private final Pattern filePattern;
 	private String seperator=File.separator;
 	private String regexSep=seperator;
-	public CD(String args, Shell s) {//On peut ajouter des symboles dans l'expression
-		//pour accepter plus de données
+	public CD(String args, Shell s) {
 		if(seperator.equals("\\"))
 			regexSep="\\\\";
 		filePattern=Pattern.compile("((([a-zA-Z0-9])([a-zA-Z0-9 ]*)"+regexSep+"?)+)");
@@ -54,6 +53,11 @@ public class CD extends Command {
 	
 	public File directory(){
 		return newDirectory;
+	}
+
+	@Override
+	public String result() {
+		return newDirectory.toString();
 	}
 
 }

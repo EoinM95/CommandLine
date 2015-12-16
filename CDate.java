@@ -1,7 +1,7 @@
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.*;
-public class CDate extends Command implements OutPipeable{
+public class CDate extends Command{
 	private String date;
 	private Shell sh;
 	public CDate(String args, Shell sh){
@@ -39,6 +39,7 @@ public class CDate extends Command implements OutPipeable{
 	@Override
 	public void run() {
 		System.out.println(date);
+		
 	}
 
 	@Override
