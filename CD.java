@@ -4,8 +4,8 @@ public class CD extends Command {
 	private Shell sh;
 	private File newDirectory;
 	private final Pattern filePattern;
-	private String seperator=File.separator;
-	private String regexSep=seperator;
+	private static String seperator=File.separator;
+	private static String regexSep=seperator;
 	public CD(String args, Shell s) {
 		if(seperator.equals("\\"))
 			regexSep="\\\\";
@@ -39,7 +39,7 @@ public class CD extends Command {
 	 * @param path, un chemin à tester
 	 * @return true si "path" est un chemin absolue
 	 */
-	private boolean isAbsolutePath(String path){//il faut changer cette expression pour des systèmes *NIX
+	public static boolean isAbsolutePath(String path){//il faut changer cette expression pour des systèmes *NIX
 		String root="";
 		File directory=Shell.START_DIRECTORY;
 		while(directory.getParent()!=null){
@@ -47,7 +47,7 @@ public class CD extends Command {
 		}
 		root=directory.toString();
 		root=root.replaceAll(regexSep,"");
-		Pattern absolutePattern=Pattern.compile(root+regexSep+"((([a-zA-Z0-9 ]+)("+regexSep+"?))*)");
+		Pattern absolutePattern=Pattern.compile(root+regexSep+"((([a-zA-Z0-9 _]+)("+regexSep+"?))*)");
 		return absolutePattern.matcher(path).matches();
 	}
 	

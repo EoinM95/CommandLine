@@ -10,7 +10,7 @@ public class Interpreter {
 		this.sh=sh;
 	}
 	enum Commands{
-		cd,ls, date,find,compteJusqua;
+		cd,ls, date,find,compteJusqua, grep;
 		public Command command(String cmd, String args, Shell sh){
 			switch(this){
 			case cd:
@@ -23,6 +23,8 @@ public class Interpreter {
 				return new Find(args,sh);
 			case compteJusqua:
 				return new Compte(args,sh);
+			case grep:
+				return new Grep(args,sh);
 			default:
 				return null;
 			}

@@ -17,7 +17,7 @@ public class Shell implements Runnable {
 		}
 
 		/**
-		 * @return the c
+		 * @return Command
 		 */
 		public Command getCommand() {
 			return c;
