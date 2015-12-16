@@ -4,8 +4,8 @@ public class CD extends Command {
 	private Shell sh;
 	private File newDirectory;
 	private final Pattern filePattern;
-	private static String seperator=File.separator;
-	private static String regexSep=seperator;
+	public static String seperator=File.separator;
+	public static String regexSep=seperator;
 	public CD(String args, Shell s) {
 		if(seperator.equals("\\"))
 			regexSep="\\\\";

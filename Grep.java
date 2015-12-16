@@ -16,24 +16,23 @@ public class Grep extends Command {
 	public Grep(String args, Shell sh){
 		this.sh=sh;
 		fileList=new ArrayList<File>();
-		result="";
-		argFormat=Pattern.compile("(?<regex>.*) (?<files>.*)");
+		result=""; //need to fix regex, does not work for multiple files
+		argFormat=Pattern.compile("(?<regex>[^ ]*)(?<files> (.*))+");
 		Matcher m=argFormat.matcher(args);
 		if(m.matches()){
 			regex=Pattern.compile(m.group("regex"));
 			String file=m.group("files");
-			System.out.println(file);
 			String[] files=file.split(" ");
 			for(String f:files){
-				File next;
-				next=new File(sh.getDirectory(),f);
-				if(!next.exists())
-					next=new File(f);				
-				if(next!=null&&next.exists())
-					fileList.add(next);
-				else
-					sh.showErrorMessage("Un des fichiers: "+f+" pas trouvée");
-				
+				if(!(f.equals("")||f.equals(" "))){
+					File next=new File(sh.getDirectory()+CD.seperator+f);
+					if(!next.exists())
+						next=new File(f);				
+					if(next!=null&&next.exists())
+						fileList.add(next);
+					else
+						sh.showErrorMessage("Un des fichiers: "+f+" pas trouvée");
+				}
 			}
 		}
 		else{

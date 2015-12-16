@@ -32,13 +32,15 @@ public class Shell implements Runnable {
 	private Matcher m;
 	private Hashtable<Integer,ShellThread> activeProcesses;
 	private int processCount=0;
+	private boolean pwd;
 	public Shell(){
 		commandPattern=Pattern.compile("(?<command>[a-zA-Z]+) ?(?<args>.*)");
 		interpreter=new Interpreter(this);
 		activeProcesses=new Hashtable<Integer,ShellThread>();
 		error=false;
 		currentDirectory=START_DIRECTORY;
-		System.out.println(USER_NAME+"@"+currentDirectory.toString());
+		pwd();
+		pwd=true;
 	}
 	
 	
@@ -64,6 +66,7 @@ public class Shell implements Runnable {
 	public void run(){
 		try{
 			while(true){
+				ShellThread current = null;
 				//Thread.sleep(20);
 				/*for(int i=0;i<processCount;i++){
 					ShellThread p=activeProcesses.get((Integer)i);
@@ -77,7 +80,7 @@ public class Shell implements Runnable {
 				error=false;
 				String input=readInput();
 				m=commandPattern.matcher(input);
-				boolean pwd=false;
+				pwd=false;
 				if(m.matches()){
 					String args[] =parse(input);
 					if(args[0].equals("pwd")){
@@ -88,7 +91,7 @@ public class Shell implements Runnable {
 						Command c=interpreter.command(args[0],args[1]);
 						if(!error&&c!=null){
 							c.setPID(processCount++);
-							ShellThread current=new ShellThread(c);
+							current=new ShellThread(c);
 							//activeProcesses.put((Integer)c.getPID(),current);
 							System.out.println(args[0]+" pid="+c.getPID());
 							current.start();
@@ -98,7 +101,7 @@ public class Shell implements Runnable {
 				}
 				else 
 					showErrorMessage("Symbole illégale");
-				if(!pwd)
+				if(!pwd&&(current==null||!current.isAlive()))
 					pwd();
 			}
 		}
@@ -112,6 +115,7 @@ public class Shell implements Runnable {
 			System.out.println("La commande pid="+c.getPID()+" a terminé, son resultat:");
 			System.out.println(c.result());
 			pwd();
+			pwd=true;
 		}
 	}
 	
