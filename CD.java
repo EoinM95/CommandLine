@@ -1,57 +1,91 @@
 import java.io.File;
 import java.util.regex.*;
+
+/**
+ * 
+ * Change de répertoire. Syntaxe : cd répertoire.
+ * 
+ * @author Eoin Murphy
+ *
+ */
 public class CD extends Command {
 	private Shell sh;
 	private File newDirectory;
 	private final Pattern filePattern;
-	public static String seperator=File.separator;
-	public static String regexSep=seperator;
-	public CD(String args, Shell s) {
-		if(seperator.equals("\\"))
-			regexSep="\\\\";
-		filePattern=Pattern.compile("((([a-zA-Z0-9])([a-zA-Z0-9 ]*)"+regexSep+"?)+)");
-		this.sh=s;
-		String path="";
-		if(args.startsWith("..")){
-			String parent=sh.getDirectory().getParent();
-			args=parent+args.substring(2,args.length());
+	public static String seperator = File.separator;
+	public static String regexSep = seperator;
+
+	/**
+	 * Construit un nouvel objet CD.
+	 * 
+	 * @param args
+	 *            répertoire dans lequel se déplacer
+	 * @param sh
+	 *            shell associé
+	 */
+	public CD(String args, Shell sh) {
+		if (seperator.equals("\\"))
+			regexSep = "\\\\";
+		filePattern = Pattern.compile("((([a-zA-Z0-9])([a-zA-Z0-9 ]*)" + regexSep + "?)+)");
+		this.sh = sh;
+
+		String path = "";
+
+		/*
+		 * Se déplace dans le répertoire parent.
+		 */
+		if (args.startsWith("..")) {
+			String parent = sh.getDirectory().getParent();
+			args = parent + args.substring(2, args.length());
 		}
-		if(isAbsolutePath(args))	
-			path=args;
-		else if(filePattern.matcher(args).matches()){
-				path=sh.getDirectory()+seperator+args;
+		/*
+		 * Si l'argument est donné en chemin absolue.
+		 */
+		if (isAbsolutePath(args))
+			path = args;
+		else if (filePattern.matcher(args).matches()) {
+			path = sh.getDirectory() + seperator + args;
+		} else {
+			sh.showErrorMessage("Nom illégal pour un répertoire.");
 		}
-		else{
-			sh.showErrorMessage("Nom illÃ©gal pour un rÃ©petoire");
-		}
-		newDirectory=new File(path);
+		newDirectory = new File(path);
 	}
 
 	@Override
 	public void run() {
-		if(newDirectory.exists()&&newDirectory.isDirectory())
+		if (newDirectory.exists() && newDirectory.isDirectory())
 			sh.setDirectory(newDirectory);
 		else
-			sh.showErrorMessage("RÃ©petoire pas trouvÃ©");
+			sh.showErrorMessage("cd: aucun fichier ni dossier de ce nom.");
 	}
+
 	/**
 	 * 
-	 * @param path, un chemin Ã  tester
-	 * @return true si "path" est un chemin absolue
+	 * Retourne vrai si l'argument est un chemin absolue, sinon faux.
+	 * 
+	 * @param path
+	 *            chemin à tester
+	 * @return true si l'argument est un chemin absolue
 	 */
-	public static boolean isAbsolutePath(String path){//il faut changer cette expression pour des systÃ¨mes *NIX
-		String root="";
-		File directory=Shell.START_DIRECTORY;
-		while(directory.getParent()!=null){
-			directory=new File(directory.getParent());
+	public static boolean isAbsolutePath(String path) {
+		// Expression à changer sous un système UNIX.
+		String root = "";
+		File directory = Shell.START_DIRECTORY;
+		while (directory.getParent() != null) {
+			directory = new File(directory.getParent());
 		}
-		root=directory.toString();
-		root=root.replaceAll(regexSep,"");
-		Pattern absolutePattern=Pattern.compile(root+regexSep+"((([a-zA-Z0-9 _]+)("+regexSep+"?))*)");
+		root = directory.toString();
+		root = root.replaceAll(regexSep, "");
+		Pattern absolutePattern = Pattern.compile(root + regexSep + "((([a-zA-Z0-9 _]+)(" + regexSep + "?))*)");
 		return absolutePattern.matcher(path).matches();
 	}
-	
-	public File directory(){
+
+	/**
+	 * Retourne le répetoire courant.
+	 * 
+	 * @return le répertoire courant
+	 */
+	public File directory() {
 		return newDirectory;
 	}
 

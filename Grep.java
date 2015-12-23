@@ -5,73 +5,84 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.regex.*;
 import java.util.ArrayList;
-public class Grep extends Command {
 
+/**
+ * Grep recherche dans les fichiers indiqués les lignes correspondantes à un
+ * certain motif. Syntaxe : grep regex fichiers.
+ * 
+ * @author Eoin Murphy
+ *
+ */
+public class Grep extends Command {
 	private String result;
 	private Shell sh;
 	private Pattern argFormat;
 	private Pattern regex;
 	private ArrayList<File> fileList;
 	private BufferedReader inputStream;
-	public Grep(String args, Shell sh){
-		this.sh=sh;
-		fileList=new ArrayList<File>();
-		result=""; //need to fix regex, does not work for multiple files
-		argFormat=Pattern.compile("(?<regex>[^ ]*)(?<files> (.*))+");
-		Matcher m=argFormat.matcher(args);
-		if(m.matches()){
-			try{
-				regex=Pattern.compile(m.group("regex"));
 
+	/**
+	 * Construit un nouvel objet Grep.
+	 * 
+	 * @param args
+	 *            format
+	 * @param sh
+	 *            shell associé
+	 */
+	public Grep(String args, Shell sh) {
+		this.sh = sh;
+		fileList = new ArrayList<File>();
+		result = ""; // need to fix regex, does not work for multiple files
+		argFormat = Pattern.compile("(?<regex>[^ ]*)(?<files> (.*))+");
+		Matcher m = argFormat.matcher(args);
+		if (m.matches()) {
+			try {
+				regex = Pattern.compile(m.group("regex"));
 
-				String file=m.group("files");
-				String[] files=file.split(" ");
-				for(String f:files){
-					if(!(f.equals("")||f.equals(" "))){
-						File next=new File(sh.getDirectory()+CD.seperator+f);
-						if(!next.exists())
-							next=new File(f);				
-						if(next!=null&&next.exists())
+				String file = m.group("files");
+				String[] files = file.split(" ");
+				for (String f : files) {
+					if (!(f.equals("") || f.equals(" "))) {
+						File next = new File(sh.getDirectory() + CD.seperator + f);
+						if (!next.exists())
+							next = new File(f);
+						if (next != null && next.exists())
 							fileList.add(next);
 						else
-							sh.showErrorMessage("Un des fichiers: "+f+" pas trouvÃ©e");
+							sh.showErrorMessage("Un des fichiers: " + f + " n'a pas été trouvé");
 					}
 				}
+			} catch (PatternSyntaxException e) {
+				sh.showErrorMessage("Syntaxe de la regex incorrecte");
 			}
-			catch(PatternSyntaxException e){
-				sh.showErrorMessage("Syntaxe illÃ©gale pour regex");
-			}
-		}
-		else{
-			sh.showErrorMessage("Input illÃ©gale");
+		} else {
+			sh.showErrorMessage("grep: entrée incorrecte");
 		}
 	}
-	
+
 	@Override
 	public void run() {
 		Matcher m;
 		try {
 			String fileInput;
-			for(File file:fileList){
-				fileInput="";
-				inputStream=new BufferedReader(new FileReader(file));
-				while(fileInput!=null){
-					fileInput=inputStream.readLine();
-					if(fileInput!=null){
-						m=regex.matcher(fileInput);
-						if(m.find()){
-							//System.out.println(fileInput);
-							result+=fileInput+"\n";
+			for (File file : fileList) {
+				fileInput = "";
+				inputStream = new BufferedReader(new FileReader(file));
+				while (fileInput != null) {
+					fileInput = inputStream.readLine();
+					if (fileInput != null) {
+						m = regex.matcher(fileInput);
+						if (m.find()) {
+							// System.out.println(fileInput);
+							result += fileInput + "\n";
 						}
 					}
 				}
 			}
-			sh.notifyFinished(this,false);
-		}
-		catch (FileNotFoundException e) {		
-			sh.showErrorMessage("Fichier pas trouvÃ©");
-		}
-		catch (IOException e) {
+			sh.notifyFinished(this, false);
+		} catch (FileNotFoundException e) {
+			sh.showErrorMessage("Fichier inexistant");
+		} catch (IOException e) {
 			sh.showErrorMessage("Erreur de lecture de fichier");
 		}
 	}
