@@ -5,16 +5,17 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.regex.*;
 import java.util.ArrayList;
-public class Grep extends Command {
-
+public class Grep extends Command implements Backgroundable {
 	private String result;
 	private Shell sh;
 	private Pattern argFormat;
 	private Pattern regex;
 	private ArrayList<File> fileList;
 	private BufferedReader inputStream;
+	private boolean dead;
 	public Grep(String args, Shell sh){
 		this.sh=sh;
+		dead=false;
 		fileList=new ArrayList<File>();
 		result=""; //need to fix regex, does not work for multiple files
 		argFormat=Pattern.compile("(?<regex>[^ ]*)(?<files> (.*))+");
@@ -22,8 +23,6 @@ public class Grep extends Command {
 		if(m.matches()){
 			try{
 				regex=Pattern.compile(m.group("regex"));
-
-
 				String file=m.group("files");
 				String[] files=file.split(" ");
 				for(String f:files){
@@ -53,11 +52,13 @@ public class Grep extends Command {
 		try {
 			String fileInput;
 			for(File file:fileList){
+				if(dead)
+					break;
 				fileInput="";
 				inputStream=new BufferedReader(new FileReader(file));
-				while(fileInput!=null){
+				while(fileInput!=null&&!dead){
 					fileInput=inputStream.readLine();
-					if(fileInput!=null){
+					if(fileInput!=null&&!dead){
 						m=regex.matcher(fileInput);
 						if(m.find()){
 							//System.out.println(fileInput);
@@ -79,6 +80,17 @@ public class Grep extends Command {
 	@Override
 	public String result() {
 		return result;
+	}
+
+	@Override
+	public void kill() {
+		dead=true;
+		result+="\nCommand terminé\n";
+	}
+
+	@Override
+	public void setBackground(boolean background) {
+		
 	}
 
 }

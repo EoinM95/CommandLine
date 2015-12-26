@@ -7,4 +7,5 @@ public abstract class Command implements Runnable, OutPipeable{
 	public int getPID(){
 		return pid;
 	}
+	
 }

@@ -1,13 +1,15 @@
 import java.util.regex.*;
 import java.io.File;
-public class Find extends Command implements OutPipeable{
+public class Find extends Command implements OutPipeable, Backgroundable{
 	private Shell sh;
 	private File path;
 	private Pattern regex;
 	private String result;
 	private boolean caseSensitive;
+	private boolean dead;
 	public Find(String args, Shell sh){
 		this.sh=sh;
+		dead=false;
 		result="";
 		Pattern argFormat=Pattern.compile("(?<path>.*) (?<param>-name|-iname) (?<regex>.*)");
 		Matcher m=argFormat.matcher(args);
@@ -45,9 +47,11 @@ public class Find extends Command implements OutPipeable{
 	private void printFiles(File directory){
 		File[] files=directory.listFiles();
 		Matcher m;
-		if(files!=null){
+		if(files!=null&&!dead){
 			for(File file:files){
-				if(file!=null){
+				if(dead)
+					break;
+				else if(file!=null){
 					if(file.isDirectory())
 						printFiles(file);
 					else{
@@ -68,6 +72,18 @@ public class Find extends Command implements OutPipeable{
 	@Override
 	public String result() {
 		return result;
+	}
+
+	@Override
+	public void kill() {
+		dead=true;
+		result+="\nCommande terminé\n";
+	}
+
+	@Override
+	public void setBackground(boolean background) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

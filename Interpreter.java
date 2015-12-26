@@ -36,6 +36,8 @@ public class Interpreter {
 			if(com.toString().equals(cmd))
 				c=com.command(cmd,args,sh);
 		}
+		if(c==null)
+			sh.showErrorMessage("Commande: "+cmd+" pas trouvée");
 		return c;		
 	}
 }

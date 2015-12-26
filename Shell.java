@@ -12,7 +12,9 @@ public class Shell implements Runnable {
 		}
 		
 		public void kill(){
-			//this.interrupt();
+			if(c instanceof Backgroundable){
+				((Backgroundable)c).kill();
+			}
 		}
 
 		/**
@@ -29,13 +31,13 @@ public class Shell implements Runnable {
 	private boolean error;
 	private final Pattern commandPattern;
 	private Matcher m;
-	private Hashtable<Integer,ShellThread> activeProcesses;
+	private Hashtable<Integer,ShellThread> backgroundProcesses;
 	private int processCount=0;
 	private boolean pwd;
 	public Shell(){
-		commandPattern=Pattern.compile("(?<command>[a-zA-Z]+) ?(?<args>.*)");
+		commandPattern=Pattern.compile("(?<command>[a-zA-Z]+) ?(?<args>[^&]*)( ?&)?");
 		interpreter=new Interpreter(this);
-		activeProcesses=new Hashtable<Integer,ShellThread>();
+		backgroundProcesses=new Hashtable<Integer,ShellThread>();
 		error=false;
 		currentDirectory=START_DIRECTORY;
 		pwd();
@@ -49,6 +51,14 @@ public class Shell implements Runnable {
 	 */
 	public File getDirectory() {
 		return currentDirectory;
+	}
+	
+	public void killCommand(int pid){
+		ShellThread c=backgroundProcesses.get((Integer)pid);
+		if(c!=null&&c.isAlive())
+			c.kill();
+		else
+			System.out.println("Commade dèja terminé");
 	}
 	
 	public void pwd(){
@@ -75,16 +85,33 @@ public class Shell implements Runnable {
 					if(args[0].equals("pwd")){
 						pwd();
 						pwd=true;
-					}	
+					}
+					else if(args[0].equals("kill")){
+						try{
+							int pid=Integer.parseInt(args[1]);
+							killCommand(pid);
+						}
+						catch(NumberFormatException e){
+							showErrorMessage("Argument invalide pour la commande kill");
+						}
+					}
 					else{
 						Command c=interpreter.command(args[0],args[1]);
 						if(!error&&c!=null){
 							c.setPID(processCount++);
 							current=new ShellThread(c);
-							//activeProcesses.put((Integer)c.getPID(),current);
 							System.out.println(args[0]+" pid="+c.getPID());
-							current.start();
-							Thread.sleep(20);
+							if(input.endsWith("&")&&c instanceof Backgroundable){
+								backgroundProcesses.put(c.getPID(),current);
+								pwd();
+								pwd=true;
+								current.start();
+							}
+							else{
+								current.start();
+								current.join();
+							}	
+							
 						}
 					}
 				}

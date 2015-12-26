@@ -1,13 +1,15 @@
 import java.util.Calendar;
 import java.util.Date;
 import java.util.regex.*;
-public class Compte extends Command {
+public class Compte extends Command implements Backgroundable{
 	private String args;
 	private int limite;
 	private Shell sh;
 	private Pattern argFormat; 
 	private String result;
+	private boolean dead;
 	public Compte(String args, Shell sh) {
+		dead=false;
 		this.sh=sh;
 		this.args=args;
 		this.result="";
@@ -21,7 +23,7 @@ public class Compte extends Command {
 	@Override
 	public void run() {
 		Calendar c=Calendar.getInstance();
-		for(int i=0;i<limite;i++){
+		for(int i=0;i<limite&&!dead;i++){
 			c.setTime(new Date());
 			int second=c.get(Calendar.SECOND);
 			result+=second+"\n";
@@ -38,6 +40,17 @@ public class Compte extends Command {
 	@Override
 	public String result() {
 		return result;
+	}
+	@Override
+	public void kill(){
+		dead=true;
+		result+="\nCommand terminé\n";
+	}
+
+	@Override
+	public void setBackground(boolean background) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }
