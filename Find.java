@@ -1,6 +1,6 @@
 import java.util.regex.*;
 import java.io.File;
-public class Find extends Command implements OutPipeable, Backgroundable{
+public class Find extends Command implements Backgroundable/*,Pipeable*/{
 	private Shell sh;
 	private File path;
 	private Pattern regex;
@@ -80,7 +80,7 @@ public class Find extends Command implements OutPipeable, Backgroundable{
 	@Override
 	public void kill() {
 		dead=true;
-		result+="\nCommande terminé\n";
+		result+="\nCommande terminé";
 	}
 
 	@Override

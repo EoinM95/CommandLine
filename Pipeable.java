@@ -4,12 +4,7 @@
  * @author Eoin Murphy
  *
  */
-public abstract interface Pipeable {
-	public abstract String result();
+public interface Pipeable {
+	public void setPiped(boolean piped);
 }
 
-interface OutPipeable extends Pipeable{}
-
-interface InPipeable{
-	public abstract String input(String input);
-}

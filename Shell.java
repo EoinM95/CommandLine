@@ -38,8 +38,9 @@ public class Shell implements Runnable {
 	private Hashtable<Integer,ShellThread> backgroundProcesses;
 	private int processCount=0;
 	private boolean pwd;
-	public Shell(){
-		linePattern=Pattern.compile("(?<command>[a-zA-Z]+) ?(?<args>[^&>]*)(>> (?<outputPath>[^&]*))?( ?&)?");
+	public Shell(){//(?<command>[a-zA-Z]+) ?(?<args>[^&>|]*)
+		String commandFormat="(([a-zA-Z]+) ?([^&>|]*))";
+		linePattern=Pattern.compile(commandFormat+"( ?[|] ?"+commandFormat+" ?)* ?(>> (?<outputPath>[^&]*))?( ?&)?");
 		interpreter=new Interpreter(this);
 		backgroundProcesses=new Hashtable<Integer,ShellThread>();
 		error=false;
@@ -86,7 +87,7 @@ public class Shell implements Runnable {
 				m=linePattern.matcher(input);
 				pwd=false;
 				if(m.matches()){
-					String args[] =parse(input);
+					String args[]=parse(input);
 					if(args[0].equals("pwd")){
 						pwd();
 						pwd=true;
@@ -102,7 +103,11 @@ public class Shell implements Runnable {
 					}
 					else{
 						String outputPath=m.group("outputPath");
-						Command c=interpreter.command(args[0],args[1]);
+						Command c;
+						if(input.contains("|"))
+							c=new Pipe(this,input.split("\\|"));
+						else
+							c=interpreter.command(args[0],args[1]);
 						c.setOutputPath(outputPath);
 						if(!error&&c!=null){
 							if(input.endsWith("&")&&c instanceof Backgroundable){
@@ -196,10 +201,16 @@ public class Shell implements Runnable {
 		return true;
 	}
 	
-	private String[] parse(String input) {
+	public String[] parse(String input) {
 		String[] parsed= new String[2];
-		parsed[0]=m.group("command");
-		parsed[1]=m.group("args");
+		Pattern commandPattern =Pattern.compile("(?<command>[a-zA-Z]+) ?(?<args>[^&>|]*)");
+		Matcher commandMatcher=commandPattern.matcher(input);
+		if(commandMatcher.find()){
+			parsed[0]=commandMatcher.group("command");
+			parsed[1]=commandMatcher.group("args");
+		}
+		else
+			showErrorMessage("Erreur du parsing");
 		return parsed;
 	}
 
@@ -208,6 +219,8 @@ public class Shell implements Runnable {
 		String input = scanner.nextLine();
 		return input;
 	}
+	
+	
 	
 	/**
 	 * Si dans l'execution d'une commande on reconte une erreur

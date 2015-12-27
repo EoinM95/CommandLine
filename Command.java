@@ -1,5 +1,5 @@
 
-public abstract class Command implements Runnable, OutPipeable{
+public abstract class Command implements Runnable{
 	protected int pid;
 	private String outputPath=null;
 	public void setPID(int pid){
@@ -20,5 +20,7 @@ public abstract class Command implements Runnable, OutPipeable{
 	public void setOutputPath(String outputPath) {
 		this.outputPath = outputPath;
 	}
-
+	
+	public abstract String result();
+	
 }
