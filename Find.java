@@ -7,6 +7,7 @@ public class Find extends Command implements OutPipeable, Backgroundable{
 	private String result;
 	private boolean caseSensitive;
 	private boolean dead;
+	private boolean background=false;
 	public Find(String args, Shell sh){
 		this.sh=sh;
 		dead=false;
@@ -36,10 +37,12 @@ public class Find extends Command implements OutPipeable, Backgroundable{
 	public void run() {
 		if(path.exists()&&path.isDirectory()){
 			printFiles(path);
-			sh.notifyFinished(this,false);
+			if(background)
+				sh.notifyFinished(this,false);
 		}
 		else{
-			sh.notifyFinished(this,true);
+			if(background)
+				sh.notifyFinished(this,true);
 			sh.showErrorMessage("Répétoire pas trouvée");
 		}
 	}
@@ -82,8 +85,7 @@ public class Find extends Command implements OutPipeable, Backgroundable{
 
 	@Override
 	public void setBackground(boolean background) {
-		// TODO Auto-generated method stub
-		
+		this.background=background;
 	}
 
 }

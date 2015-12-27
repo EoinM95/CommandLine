@@ -2,13 +2,11 @@ import java.io.File;
 import java.util.regex.*;
 public class CD extends Command {
 	private Shell sh;
-	private File newDirectory;
+	private File newDirectory=null;
 	private final Pattern filePattern;
 	public static String seperator=File.separator;
-	public static String regexSep=seperator;
+	public static String regexSep=(seperator.equals("\\")?"\\\\" : seperator);
 	public CD(String args, Shell s) {
-		if(seperator.equals("\\"))
-			regexSep="\\\\";
 		filePattern=Pattern.compile("((([a-zA-Z0-9])([a-zA-Z0-9 ]*)"+regexSep+"?)+)");
 		this.sh=s;
 		String path="";
@@ -39,7 +37,7 @@ public class CD extends Command {
 	 * @param path, un chemin à tester
 	 * @return true si "path" est un chemin absolue
 	 */
-	public static boolean isAbsolutePath(String path){//il faut changer cette expression pour des systèmes *NIX
+	public static boolean isAbsolutePath(String path){
 		String root="";
 		File directory=Shell.START_DIRECTORY;
 		while(directory.getParent()!=null){
@@ -47,7 +45,7 @@ public class CD extends Command {
 		}
 		root=directory.toString();
 		root=root.replaceAll(regexSep,"");
-		Pattern absolutePattern=Pattern.compile(root+regexSep+"((([a-zA-Z0-9 _]+)("+regexSep+"?))*)");
+		Pattern absolutePattern=Pattern.compile(root+regexSep+"((([a-zA-Z0-9 _\\.]+)("+regexSep+"?))*)");
 		return absolutePattern.matcher(path).matches();
 	}
 	
@@ -57,7 +55,7 @@ public class CD extends Command {
 
 	@Override
 	public String result() {
-		return newDirectory.toString();
+		return null;
 	}
 
 }

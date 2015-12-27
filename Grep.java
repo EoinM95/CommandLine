@@ -13,6 +13,7 @@ public class Grep extends Command implements Backgroundable {
 	private ArrayList<File> fileList;
 	private BufferedReader inputStream;
 	private boolean dead;
+	private boolean background=false;
 	public Grep(String args, Shell sh){
 		this.sh=sh;
 		dead=false;
@@ -67,7 +68,8 @@ public class Grep extends Command implements Backgroundable {
 					}
 				}
 			}
-			sh.notifyFinished(this,false);
+			if(background)
+				sh.notifyFinished(this,false);
 		}
 		catch (FileNotFoundException e) {		
 			sh.showErrorMessage("Fichier pas trouvé");
@@ -90,7 +92,7 @@ public class Grep extends Command implements Backgroundable {
 
 	@Override
 	public void setBackground(boolean background) {
-		
+		this.background=background;
 	}
 
 }

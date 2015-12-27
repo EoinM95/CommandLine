@@ -1,4 +1,7 @@
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.Hashtable;
 import java.util.Scanner;
 import java.util.regex.*;
@@ -26,16 +29,17 @@ public class Shell implements Runnable {
 	}
 	public static final String USER_NAME=System.getProperty("user.name");
 	public static final File START_DIRECTORY=new File(System.getProperty("user.home"));
+	public static final String NEW_LINE=System.getProperty("line.separator");
 	private Interpreter interpreter;
 	private File currentDirectory;
 	private boolean error;
-	private final Pattern commandPattern;
+	private final Pattern linePattern;
 	private Matcher m;
 	private Hashtable<Integer,ShellThread> backgroundProcesses;
 	private int processCount=0;
 	private boolean pwd;
 	public Shell(){
-		commandPattern=Pattern.compile("(?<command>[a-zA-Z]+) ?(?<args>[^&]*)( ?&)?");
+		linePattern=Pattern.compile("(?<command>[a-zA-Z]+) ?(?<args>[^&>]*)(>> (?<outputPath>[^&]*))?( ?&)?");
 		interpreter=new Interpreter(this);
 		backgroundProcesses=new Hashtable<Integer,ShellThread>();
 		error=false;
@@ -59,6 +63,7 @@ public class Shell implements Runnable {
 			c.kill();
 		else
 			System.out.println("Commade dèja terminé");
+		backgroundProcesses.remove((Integer)pid);
 	}
 	
 	public void pwd(){
@@ -78,7 +83,7 @@ public class Shell implements Runnable {
 				ShellThread current = null;
 				error=false;
 				String input=readInput();
-				m=commandPattern.matcher(input);
+				m=linePattern.matcher(input);
 				pwd=false;
 				if(m.matches()){
 					String args[] =parse(input);
@@ -96,20 +101,30 @@ public class Shell implements Runnable {
 						}
 					}
 					else{
+						String outputPath=m.group("outputPath");
 						Command c=interpreter.command(args[0],args[1]);
+						c.setOutputPath(outputPath);
 						if(!error&&c!=null){
-							c.setPID(processCount++);
-							current=new ShellThread(c);
-							System.out.println(args[0]+" pid="+c.getPID());
 							if(input.endsWith("&")&&c instanceof Backgroundable){
+								current=new ShellThread(c);
+								c.setPID(processCount++);
+								((Backgroundable)c).setBackground(true);
+								System.out.println(args[0]+" pid="+c.getPID()+" commencé");
 								backgroundProcesses.put(c.getPID(),current);
 								pwd();
 								pwd=true;
 								current.start();
 							}
 							else{
-								current.start();
-								current.join();
+								c.run();
+								String result=c.result();
+								if(outputPath==null||outputPath.equals("")){								
+									if(result!=null)
+										System.out.println(result);
+								}
+								else{
+									writeOutput(result,outputPath);
+								}
 							}	
 							
 						}
@@ -133,11 +148,52 @@ public class Shell implements Runnable {
 	 */
 	public void notifyFinished(Command c, boolean error){
 		if(!error){
-			System.out.println("La commande pid="+c.getPID()+" a terminé, son resultat:");
-			System.out.println(c.result());
+			System.out.println("La commande pid="+c.getPID()+" a terminé");
+			String outputPath=c.getOutputPath();
+			String result=c.result();
+			boolean print=true;
+			if(!(outputPath==null))
+				if(writeOutput(result,outputPath)){
+					print=false;
+				}
+			if(print){
+				System.out.println("Resultat du commande:");
+				System.out.println(result);
+			}
 			pwd();
 			pwd=true;
 		}
+		backgroundProcesses.remove((Integer)c.getPID());
+	}
+	
+	private boolean writeOutput(String output, String path){
+		if(output==null||path==null)
+			return false;
+		output=output.replaceAll("\\n",NEW_LINE);
+		File outputFile;
+		PrintWriter outputStream=null;
+		if(CD.isAbsolutePath(path))
+			outputFile=new File(path);
+		else
+			outputFile=new File(currentDirectory.toString()+CD.seperator+path);
+		try{
+			if(outputFile.exists()||outputFile.createNewFile()){
+				outputStream = new PrintWriter(new FileWriter(outputFile)) ;
+				outputStream.print(output);
+			}
+			else{
+				showErrorMessage("Nom du fichier pas valide");
+				return false;
+			}
+		}
+		catch (IOException e) {
+			//showErrorMessage("Erreur IO");
+			e.printStackTrace();
+			return false;
+		}
+		if(outputStream!=null)
+			outputStream.close();
+		return true;
 	}
 	
 	private String[] parse(String input) {

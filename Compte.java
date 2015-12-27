@@ -8,6 +8,7 @@ public class Compte extends Command implements Backgroundable{
 	private Pattern argFormat; 
 	private String result;
 	private boolean dead;
+	private boolean background=false;
 	public Compte(String args, Shell sh) {
 		dead=false;
 		this.sh=sh;
@@ -26,15 +27,23 @@ public class Compte extends Command implements Backgroundable{
 		for(int i=0;i<limite&&!dead;i++){
 			c.setTime(new Date());
 			int second=c.get(Calendar.SECOND);
-			result+=second+"\n";
+			if(background)
+				result+=second+"\n";
+			else
+				System.out.println(second);
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
-				e.printStackTrace();
-				sh.notifyFinished(this,true);
+				//e.printStackTrace();
+				sh.showErrorMessage("Thread interrompu");
+				if(background)
+					sh.notifyFinished(this,true);
 			}
 		}
-		sh.notifyFinished(this,false);
+		if(background)
+			sh.notifyFinished(this,false);
+		else
+			result=null;
 	}
 
 	@Override
@@ -49,7 +58,7 @@ public class Compte extends Command implements Backgroundable{
 
 	@Override
 	public void setBackground(boolean background) {
-		// TODO Auto-generated method stub
+		this.background=background;
 		
 	}
 
