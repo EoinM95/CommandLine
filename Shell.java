@@ -40,7 +40,7 @@ public class Shell implements Runnable {
 	private boolean pwd;
 	public Shell(){//(?<command>[a-zA-Z]+) ?(?<args>[^&>|]*)
 		String commandFormat="(([a-zA-Z]+) ?([^&>|]*))";
-		linePattern=Pattern.compile(commandFormat+"( ?[|] ?"+commandFormat+" ?)* ?(>> (?<outputPath>[^&]*))?( ?&)?");
+		linePattern=Pattern.compile(commandFormat+"( ?[|] ?"+commandFormat+" ?)*( (>> (?<outputPath>[^&]*)))?( ?&)?");
 		interpreter=new Interpreter(this);
 		backgroundProcesses=new Hashtable<Integer,ShellThread>();
 		error=false;
@@ -203,11 +203,14 @@ public class Shell implements Runnable {
 	
 	public String[] parse(String input) {
 		String[] parsed= new String[2];
-		Pattern commandPattern =Pattern.compile("(?<command>[a-zA-Z]+) ?(?<args>[^&>|]*)");
+		Pattern commandPattern =Pattern.compile("(?<command>[a-zA-Z]+) ?(?<args>[^&>|]*) ?");
 		Matcher commandMatcher=commandPattern.matcher(input);
 		if(commandMatcher.find()){
 			parsed[0]=commandMatcher.group("command");
-			parsed[1]=commandMatcher.group("args");
+			String args=commandMatcher.group("args");
+			if(args.endsWith(" "))
+				args=args.substring(0,args.length()-2);
+			parsed[1]=args;
 		}
 		else
 			showErrorMessage("Erreur du parsing");
