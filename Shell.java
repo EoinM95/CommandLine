@@ -37,7 +37,7 @@ public class Shell implements Runnable {
 	private Matcher m;
 	private Hashtable<Integer,ShellThread> backgroundProcesses;
 	private int processCount=0;
-	private boolean pwd;
+	private boolean printUserDirectory;
 	public Shell(){//(?<command>[a-zA-Z]+) ?(?<args>[^&>|]*)
 		String commandFormat="(([a-zA-Z]+) ?([^&>|]*))";
 		linePattern=Pattern.compile(commandFormat+"( ?[|] ?"+commandFormat+" ?)*( (>> (?<outputPath>[^&]*)))?( ?&)?");
@@ -45,8 +45,7 @@ public class Shell implements Runnable {
 		backgroundProcesses=new Hashtable<Integer,ShellThread>();
 		error=false;
 		currentDirectory=START_DIRECTORY;
-		pwd();
-		pwd=true;
+		printUserDirectory();
 	}
 	
 	
@@ -67,8 +66,9 @@ public class Shell implements Runnable {
 		backgroundProcesses.remove((Integer)pid);
 	}
 	
-	public void pwd(){
+	public void printUserDirectory(){
 		System.out.println(USER_NAME+"@"+currentDirectory.toString());
+		printUserDirectory=true;
 	}
 
 	/**
@@ -85,14 +85,10 @@ public class Shell implements Runnable {
 				error=false;
 				String input=readInput();
 				m=linePattern.matcher(input);
-				pwd=false;
+				printUserDirectory=false;
 				if(m.matches()){
 					String args[]=parse(input);
-					if(args[0].equals("pwd")){
-						pwd();
-						pwd=true;
-					}
-					else if(args[0].equals("kill")){
+					if(args[0].equals("kill")){
 						try{
 							int pid=Integer.parseInt(args[1]);
 							killCommand(pid);
@@ -116,8 +112,7 @@ public class Shell implements Runnable {
 								((Backgroundable)c).setBackground(true);
 								System.out.println(args[0]+" pid="+c.getPID()+" commencé");
 								backgroundProcesses.put(c.getPID(),current);
-								pwd();
-								pwd=true;
+								printUserDirectory();
 								current.start();
 							}
 							else{
@@ -137,8 +132,8 @@ public class Shell implements Runnable {
 				}
 				else 
 					showErrorMessage("Symbole illégale");
-				if(!pwd&&(current==null||!current.isAlive()))
-					pwd();
+				if(!printUserDirectory&&(current==null||!current.isAlive()))
+					printUserDirectory();
 			}
 		}
 		catch(Exception e){
@@ -165,8 +160,7 @@ public class Shell implements Runnable {
 				System.out.println("Resultat du commande:");
 				System.out.println(result);
 			}
-			pwd();
-			pwd=true;
+			printUserDirectory();
 		}
 		backgroundProcesses.remove((Integer)c.getPID());
 	}
@@ -192,8 +186,7 @@ public class Shell implements Runnable {
 			}
 		}
 		catch (IOException e) {
-			//showErrorMessage("Erreur IO");
-			e.printStackTrace();
+			showErrorMessage("Erreur IO");
 			return false;
 		}
 		if(outputStream!=null)

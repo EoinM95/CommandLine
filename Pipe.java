@@ -20,8 +20,11 @@ public class Pipe extends Command implements Backgroundable {
 			String[] args = sh.parse(commands[i]);
 			if(i==0)
 				nextCommand=interpreter.command(args[0],args[1]);
-			else
+			else{
 				nextCommand=interpreter.command(args[0],args[1]+" "+previousResult);
+				if(nextCommand instanceof Pipeable) 
+					((Pipeable)nextCommand).setPiped(true);
+			}	
 			if(nextCommand==null){
 				if(background)
 					sh.notifyFinished(this,true);

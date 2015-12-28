@@ -1,19 +1,33 @@
 import java.util.regex.*;
 import java.io.File;
-public class Find extends Command implements Backgroundable/*,Pipeable*/{
+public class Find extends Command implements Backgroundable,Pipeable{
 	private Shell sh;
+	private String args;
 	private File path;
 	private Pattern regex;
 	private String result;
+	private Pattern argFormat;
+	private Pattern pipedArgFormat;
 	private boolean caseSensitive;
 	private boolean dead;
 	private boolean background=false;
+	private boolean piped=false;
 	public Find(String args, Shell sh){
 		this.sh=sh;
+		this.args=args;
 		dead=false;
 		result="";
-		Pattern argFormat=Pattern.compile("(?<path>.*) (?<param>-name|-iname) (?<regex>.*)");
-		Matcher m=argFormat.matcher(args);
+		argFormat=Pattern.compile("(?<path>.*) (?<param>-name|-iname) (?<regex>.*)");
+		pipedArgFormat=Pattern.compile("(?<param>-name|-iname) (?<regex>.*) (?<path>.*)");
+	}
+	
+	@Override
+	public void run() {
+		Matcher m;
+		if(piped)
+			m=pipedArgFormat.matcher(args);
+		else
+			m=argFormat.matcher(args);
 		if(m.matches()){
 			CD directoryCheck=new CD(m.group("path"),sh);
 			path= directoryCheck.directory();
@@ -31,10 +45,6 @@ public class Find extends Command implements Backgroundable/*,Pipeable*/{
 		else{
 			sh.showErrorMessage("Argument illégale pour commande <<find>>");
 		}
-	}
-	
-	@Override
-	public void run() {
 		if(path.exists()&&path.isDirectory()){
 			printFiles(path);
 			if(background)
@@ -64,7 +74,6 @@ public class Find extends Command implements Backgroundable/*,Pipeable*/{
 							m=regex.matcher(file.toString().toLowerCase());
 						if(m.find()){
 							result+=file.toString()+"\n";
-							//System.out.println(file.toString());
 						}
 					}
 				}
@@ -88,4 +97,8 @@ public class Find extends Command implements Backgroundable/*,Pipeable*/{
 		this.background=background;
 	}
 
+	@Override
+	public void setPiped(boolean piped) {
+		this.piped=piped;
+	}
 }
