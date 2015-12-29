@@ -7,7 +7,7 @@ public class CD extends Command {
 	public static String seperator=File.separator;
 	public static String regexSep=(seperator.equals("\\")?"\\\\" : seperator);
 	public CD(String args, Shell s) {
-		filePattern=Pattern.compile("((([a-zA-Z0-9])([a-zA-Z0-9 ]*)"+regexSep+"?)+)");
+		filePattern=Pattern.compile(regexSep+"?((([a-zA-Z0-9])([a-zA-Z0-9_ ]*)"+regexSep+"?)+)");
 		this.sh=s;
 		String path="";
 		if(args.startsWith("..")){
