@@ -20,6 +20,10 @@ public class Grep extends Command implements Backgroundable, Pipeable {
 		dead=false;
 		fileList=new ArrayList<File>();
 		result="";
+		/*
+		 * Allows grep to differentiate between spaces in file names and spaces between files
+		 * by replacing spaces between files with \n and splitting 
+		 */
 		args=args.replaceAll("(?<=\\.[a-zA-Z0-9]){2,4} ","\n");
 		argFormat=Pattern.compile("(?<regex>[^ ]*) (?<files>.*)",Pattern.DOTALL);
 		Matcher m=argFormat.matcher(args);
