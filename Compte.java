@@ -25,6 +25,9 @@ public class Compte extends Command implements Backgroundable{
 			else
 				displayFormat=f;
 		}
+		else{
+			sh.showErrorMessage("Input illégale pour commande <<compteJusqua>>");
+		}
 	}
 
 	@Override
