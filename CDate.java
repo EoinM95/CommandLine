@@ -12,7 +12,7 @@ public class CDate extends Command{
 			format="YYYY-MM-dd";
 		}	
 		else{
-			Pattern argFormat= Pattern.compile("\\+(%([dHMmY])([/-:\\\\\\. ])?)*");
+			Pattern argFormat= Pattern.compile("\\+?(%([dHMmY])([/-:\\\\\\. ])?)*");
 			Matcher m=argFormat.matcher(args);		
 			if(m.matches()){
 				Pattern elementFormat=Pattern.compile("(%(?<dateInfo>[dHMmY])(?<seperator>[/-:\\\\\\. ])?)");

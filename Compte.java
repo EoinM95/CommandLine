@@ -8,6 +8,7 @@ public class Compte extends Command implements Backgroundable{
 	private Pattern argFormat; 
 	private String result;
 	private boolean dead;
+	private String displayFormat;
 	private boolean background=false;
 	public Compte(String args, Shell sh) {
 		dead=false;
@@ -18,6 +19,11 @@ public class Compte extends Command implements Backgroundable{
 		Matcher m=argFormat.matcher(args);
 		if(m.matches()){
 			limite=Integer.parseInt(m.group("time"));
+			String f=m.group("format");
+			if(f==null||f.equals(""))
+				displayFormat="%d%n";
+			else
+				displayFormat=f;
 		}
 	}
 
@@ -27,14 +33,14 @@ public class Compte extends Command implements Backgroundable{
 		for(int i=0;i<limite&&!dead;i++){
 			c.setTime(new Date());
 			int second=c.get(Calendar.SECOND);
+			String output=String.format(displayFormat,second);
 			if(background)
-				result+=second+"\n";
+				result+=output;
 			else
-				System.out.println(second);
+				System.out.print(output);
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
-				//e.printStackTrace();
 				sh.showErrorMessage("Thread interrompu");
 				if(background)
 					sh.notifyFinished(this,true);
@@ -53,7 +59,7 @@ public class Compte extends Command implements Backgroundable{
 	@Override
 	public void kill(){
 		dead=true;
-		result+="\nCommand terminé\n";
+		result+="\nCommand terminé";
 	}
 
 	@Override
