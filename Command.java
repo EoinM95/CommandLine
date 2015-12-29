@@ -2,6 +2,7 @@
 public abstract class Command implements Runnable{
 	protected int pid;
 	private String outputPath=null;
+	private boolean overwrite=false;
 	public void setPID(int pid){
 		this.pid=pid;
 	}	
@@ -22,5 +23,17 @@ public abstract class Command implements Runnable{
 	}
 	
 	public abstract String result();
+	/**
+	 * @return overwrite
+	 */
+	public boolean canOverwrite() {
+		return overwrite;
+	}
+	/**
+	 * @param overwrite
+	 */
+	public void setOverwrite(boolean overwrite) {
+		this.overwrite = overwrite;
+	}
 	
 }

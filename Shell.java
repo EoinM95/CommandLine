@@ -40,7 +40,8 @@ public class Shell implements Runnable {
 	private boolean printUserDirectory;
 	public Shell(){//(?<command>[a-zA-Z]+) ?(?<args>[^&>|]*)
 		String commandFormat="(([a-zA-Z]+) ?([^&>|]*))";
-		linePattern=Pattern.compile(commandFormat+"( ?[|] ?"+commandFormat+" ?)*( (>> (?<outputPath>[^&]*)))?( ?&)?");
+		linePattern=
+				Pattern.compile(commandFormat+"( ?[|] ?"+commandFormat+" ?)*( ((?<overwrite>>|>>) (?<outputPath>[^&]*)))?( ?&)?");
 		interpreter=new Interpreter(this);
 		backgroundProcesses=new Hashtable<Integer,ShellThread>();
 		error=false;
@@ -105,6 +106,8 @@ public class Shell implements Runnable {
 						else
 							c=interpreter.command(args[0],args[1]);
 						c.setOutputPath(outputPath);
+						boolean overwrite=(m.group("overwrite").equals(">"));
+						c.setOverwrite(overwrite);
 						if(!error&&c!=null){
 							if(input.endsWith("&")&&c instanceof Backgroundable){
 								current=new ShellThread(c);
@@ -123,7 +126,7 @@ public class Shell implements Runnable {
 										System.out.println(result);
 								}
 								else{
-									writeOutput(result,outputPath);
+									writeOutput(result,outputPath,overwrite);
 								}
 							}	
 							
@@ -153,7 +156,7 @@ public class Shell implements Runnable {
 			String result=c.result();
 			boolean print=true;
 			if(!(outputPath==null))
-				if(writeOutput(result,outputPath)){
+				if(writeOutput(result,outputPath,c.canOverwrite())){
 					print=false;
 				}
 			if(print){
@@ -165,7 +168,7 @@ public class Shell implements Runnable {
 		backgroundProcesses.remove((Integer)c.getPID());
 	}
 	
-	private boolean writeOutput(String output, String path){
+	private boolean writeOutput(String output, String path, boolean canOverwrite){
 		if(output==null||path==null)
 			return false;
 		output=output.replaceAll("\\n",NEW_LINE);
@@ -176,11 +179,22 @@ public class Shell implements Runnable {
 		else
 			outputFile=new File(currentDirectory.toString()+CD.seperator+path);
 		try{
-			if(outputFile.exists()||outputFile.createNewFile()){
+			if(outputFile.exists()){
+				if(canOverwrite){
+					outputStream = new PrintWriter(new FileWriter(outputFile)) ;
+					outputStream.print(output);
+				}
+				else{
+					outputStream = new PrintWriter(new FileWriter(outputFile,true)) ;
+					outputStream.print(NEW_LINE+output);
+				}
+			}
+			else if(outputFile.createNewFile()){
 				outputStream = new PrintWriter(new FileWriter(outputFile)) ;
 				outputStream.print(output);
 			}
-			else{
+			else
+			{
 				showErrorMessage("Nom du fichier pas valide");
 				return false;
 			}

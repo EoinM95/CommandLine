@@ -20,7 +20,7 @@ public class Grep extends Command implements Backgroundable, Pipeable {
 		dead=false;
 		fileList=new ArrayList<File>();
 		result="";
-		args=args.replaceAll("(?<=\\.[a-zA-Z0-9]){2,4} ","\n");//([^ ]*) ((.*))
+		args=args.replaceAll("(?<=\\.[a-zA-Z0-9]){2,4} ","\n");
 		argFormat=Pattern.compile("(?<regex>[^ ]*) (?<files>.*)",Pattern.DOTALL);
 		Matcher m=argFormat.matcher(args);
 		if(m.matches()){
