@@ -106,7 +106,7 @@ public class Shell implements Runnable {
 						else
 							c=interpreter.command(args[0],args[1]);
 						c.setOutputPath(outputPath);
-						boolean overwrite=(m.group("overwrite").equals(">"));
+						boolean overwrite=(">".equals(m.group("overwrite")));
 						c.setOverwrite(overwrite);
 						if(!error&&c!=null){
 							if(input.endsWith("&")&&c instanceof Backgroundable){
